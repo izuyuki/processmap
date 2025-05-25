@@ -93,6 +93,14 @@ if submit_button:
                         m2 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
                         # A[ノード名] --> B[ノード名]
                         m1 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
+                        # A(ノード名) -- ラベル --> B(ノード名)
+                        m6 = re.match(r'\s*([A-Za-z0-9_]+)\((.*?)\)\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\((.*?)\)', line)
+                        # A(ノード名) --> B(ノード名)
+                        m5 = re.match(r'\s*([A-Za-z0-9_]+)\((.*?)\)\s*--?>\s*([A-Za-z0-9_]+)\((.*?)\)', line)
+                        # A((ノード名)) -- ラベル --> B((ノード名))
+                        m8 = re.match(r'\s*([A-Za-z0-9_]+)\(\((.*?)\)\)\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\(\((.*?)\)\)', line)
+                        # A((ノード名)) --> B((ノード名))
+                        m7 = re.match(r'\s*([A-Za-z0-9_]+)\(\((.*?)\)\)\s*--?>\s*([A-Za-z0-9_]+)\(\((.*?)\)\)', line)
                         # B{ノード名} -- ラベル --> C[ノード名]
                         m4 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
                         # B{ノード名} --> C[ノード名]
@@ -105,6 +113,24 @@ if submit_button:
                         elif m1:
                             from_label = m1.group(2)
                             to_label = m1.group(4)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
+                        elif m6:
+                            from_label = m6.group(2)
+                            edge_label = m6.group(3)
+                            to_label = m6.group(5)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
+                        elif m5:
+                            from_label = m5.group(2)
+                            to_label = m5.group(4)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
+                        elif m8:
+                            from_label = m8.group(2)
+                            edge_label = m8.group(3)
+                            to_label = m8.group(5)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
+                        elif m7:
+                            from_label = m7.group(2)
+                            to_label = m7.group(4)
                             graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
                         elif m4:
                             from_label = m4.group(2)
