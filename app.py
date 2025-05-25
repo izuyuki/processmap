@@ -74,79 +74,12 @@ if submit_button:
             st.subheader("分析結果")
             st.write(response.text)
 
-            # Graphviz部分だけ抽出して表示
-            graphviz_match = re.search(r"```graphviz\s*([\s\S]+?)```", response.text)
-            if graphviz_match:
-                st.subheader("プロセスフロー図（Graphviz形式）")
-                st.graphviz_chart(graphviz_match.group(1))
+            # 参考URLを抽出して表示
+            url_match = re.search(r'(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)', response.text)
+            if url_match:
+                st.markdown(f"**参考URL:** [{url_match.group(1)}]({url_match.group(1)})")
             else:
-                # Mermaid記法があればGraphvizに変換して表示（日本語・分岐・ラベル対応）
-                mermaid_match = re.search(r"```mermaid\s*([\s\S]+?)```", response.text)
-                if mermaid_match:
-                    mermaid_code = mermaid_match.group(1)
-                    graphviz_code = "digraph G {\n"
-                    for line in mermaid_code.splitlines():
-                        # graph, style, linkStyle行はスキップ
-                        if line.strip().startswith(("graph", "style", "linkStyle")) or not line.strip():
-                            continue
-                        # A[ノード名] -- ラベル --> B[ノード名]
-                        m2 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
-                        # A[ノード名] --> B[ノード名]
-                        m1 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
-                        # A(ノード名) -- ラベル --> B(ノード名)
-                        m6 = re.match(r'\s*([A-Za-z0-9_]+)\((.*?)\)\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\((.*?)\)', line)
-                        # A(ノード名) --> B(ノード名)
-                        m5 = re.match(r'\s*([A-Za-z0-9_]+)\((.*?)\)\s*--?>\s*([A-Za-z0-9_]+)\((.*?)\)', line)
-                        # A((ノード名)) -- ラベル --> B((ノード名))
-                        m8 = re.match(r'\s*([A-Za-z0-9_]+)\(\((.*?)\)\)\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\(\((.*?)\)\)', line)
-                        # A((ノード名)) --> B((ノード名))
-                        m7 = re.match(r'\s*([A-Za-z0-9_]+)\(\((.*?)\)\)\s*--?>\s*([A-Za-z0-9_]+)\(\((.*?)\)\)', line)
-                        # B{ノード名} -- ラベル --> C[ノード名]
-                        m4 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
-                        # B{ノード名} --> C[ノード名]
-                        m3 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
-                        if m2:
-                            from_label = m2.group(2)
-                            edge_label = m2.group(3)
-                            to_label = m2.group(5)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
-                        elif m1:
-                            from_label = m1.group(2)
-                            to_label = m1.group(4)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
-                        elif m6:
-                            from_label = m6.group(2)
-                            edge_label = m6.group(3)
-                            to_label = m6.group(5)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
-                        elif m5:
-                            from_label = m5.group(2)
-                            to_label = m5.group(4)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
-                        elif m8:
-                            from_label = m8.group(2)
-                            edge_label = m8.group(3)
-                            to_label = m8.group(5)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
-                        elif m7:
-                            from_label = m7.group(2)
-                            to_label = m7.group(4)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
-                        elif m4:
-                            from_label = m4.group(2)
-                            edge_label = m4.group(3)
-                            to_label = m4.group(5)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
-                        elif m3:
-                            from_label = m3.group(2)
-                            to_label = m3.group(4)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
-                    graphviz_code += "}"
-                    st.subheader("プロセスフロー図（自動変換Graphviz）")
-                    st.code(graphviz_code, language="text")
-                    st.graphviz_chart(graphviz_code)
-                else:
-                    st.info("Graphviz形式またはMermaid形式のフローチャートが見つかりませんでした。")
+                st.info("参考にしたページのURLは見つかりませんでした。")
         except Exception as e:
             import traceback
             st.error("APIリクエスト中にエラーが発生しました。")
