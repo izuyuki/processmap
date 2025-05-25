@@ -86,14 +86,17 @@ if submit_button:
                     mermaid_code = mermaid_match.group(1)
                     graphviz_code = "digraph G {\n"
                     for line in mermaid_code.splitlines():
-                        # A[ノード名] -- ラベル --> B[ノード名];
-                        m2 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
-                        # A[ノード名] --> B[ノード名];
-                        m1 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
-                        # B{ノード名} -- ラベル --> C[ノード名];
-                        m4 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
-                        # B{ノード名} --> C[ノード名];
-                        m3 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
+                        # graph, style, linkStyle行はスキップ
+                        if line.strip().startswith(("graph", "style", "linkStyle")) or not line.strip():
+                            continue
+                        # A[ノード名] -- ラベル --> B[ノード名]
+                        m2 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
+                        # A[ノード名] --> B[ノード名]
+                        m1 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
+                        # B{ノード名} -- ラベル --> C[ノード名]
+                        m4 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
+                        # B{ノード名} --> C[ノード名]
+                        m3 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\]', line)
                         if m2:
                             from_label = m2.group(2)
                             edge_label = m2.group(3)
