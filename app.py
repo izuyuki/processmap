@@ -80,18 +80,45 @@ if submit_button:
                 st.subheader("プロセスフロー図（Graphviz形式）")
                 st.graphviz_chart(graphviz_match.group(1))
             else:
-                # Mermaid記法があればGraphvizに変換して表示（簡易変換例）
+                # Mermaid記法があればGraphvizに変換して表示（日本語・分岐・ラベル対応）
                 mermaid_match = re.search(r"```mermaid\s*([\s\S]+?)```", response.text)
                 if mermaid_match:
                     mermaid_code = mermaid_match.group(1)
-                    # 簡易的にMermaidのノードとエッジをGraphvizに変換
                     graphviz_code = "digraph G {\n"
                     for line in mermaid_code.splitlines():
-                        m = re.match(r"\s*([A-Za-z0-9_]+)\[.*?\]\s*--?>\s*([A-Za-z0-9_]+)\[.*?\]", line)
-                        if m:
-                            graphviz_code += f'    {m.group(1)} -> {m.group(2)};\n'
+                        # A[ノード名] -- ラベル --> B[ノード名];
+                        m2 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
+                        # A[ノード名] --> B[ノード名];
+                        m1 = re.match(r'\s*([A-Za-z0-9_]+)\[(.*?)\]\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
+                        # B{ノード名} -- ラベル --> C[ノード名];
+                        m4 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--\s*(.*?)\s*-->\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
+                        # B{ノード名} --> C[ノード名];
+                        m3 = re.match(r'\s*([A-Za-z0-9_]+)\{(.*?)\}\s*--?>\s*([A-Za-z0-9_]+)\[(.*?)\];', line)
+                        if m2:
+                            from_label = m2.group(2)
+                            edge_label = m2.group(3)
+                            to_label = m2.group(5)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];
+'
+                        elif m1:
+                            from_label = m1.group(2)
+                            to_label = m1.group(4)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}";
+'
+                        elif m4:
+                            from_label = m4.group(2)
+                            edge_label = m4.group(3)
+                            to_label = m4.group(5)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];
+'
+                        elif m3:
+                            from_label = m3.group(2)
+                            to_label = m3.group(4)
+                            graphviz_code += f'    "{from_label}" -> "{to_label}";
+'
                     graphviz_code += "}"
                     st.subheader("プロセスフロー図（自動変換Graphviz）")
+                    st.code(graphviz_code, language="text")
                     st.graphviz_chart(graphviz_code)
                 else:
                     st.info("Graphviz形式またはMermaid形式のフローチャートが見つかりませんでした。")
