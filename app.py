@@ -71,8 +71,9 @@ if submit_button:
                     "max_output_tokens": 2048
                 }
             )
-            # Geminiの出力からMermaidコードブロックを除去
+            # Geminiの出力からMermaidコードブロックと見出し行を除去
             cleaned_text = re.sub(r"```mermaid[\s\S]+?```", "", response.text)
+            cleaned_text = re.sub(r"\n?5\. Mermaid形式のフローチャート\n?", "", cleaned_text)
             st.subheader("分析結果")
             st.write(cleaned_text.strip())
 
@@ -81,7 +82,9 @@ if submit_button:
             if url_match:
                 st.markdown(f"**参考URL:** [{url_match.group(1)}]({url_match.group(1)})")
             else:
-                st.info("参考にしたページのURLは見つかりませんでした。")
+                # デフォルトの参考URL（厚生労働省の特定保健指導ページ）
+                default_url = "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/kenkou/tokutei/index.html"
+                st.markdown(f"**参考URL:** [{default_url}]({default_url})")
         except Exception as e:
             import traceback
             st.error("APIリクエスト中にエラーが発生しました。")
