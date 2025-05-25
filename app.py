@@ -76,15 +76,6 @@ if submit_button:
             cleaned_text = re.sub(r"\n?5\. Mermaid形式のフローチャート\n?", "", cleaned_text)
             st.subheader("分析結果")
             st.write(cleaned_text.strip())
-
-            # 参考URLを抽出して表示
-            url_match = re.search(r'(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)', response.text)
-            if url_match:
-                st.markdown(f"**参考URL:** [{url_match.group(1)}]({url_match.group(1)})")
-            else:
-                # デフォルトの参考URL（厚生労働省の特定保健指導ページ）
-                default_url = "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/kenkou/tokutei/index.html"
-                st.markdown(f"**参考URL:** [{default_url}]({default_url})")
         except Exception as e:
             import traceback
             st.error("APIリクエスト中にエラーが発生しました。")
