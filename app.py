@@ -71,8 +71,10 @@ if submit_button:
                     "max_output_tokens": 2048
                 }
             )
+            # Geminiの出力からMermaidコードブロックを除去
+            cleaned_text = re.sub(r"```mermaid[\s\S]+?```", "", response.text)
             st.subheader("分析結果")
-            st.write(response.text)
+            st.write(cleaned_text.strip())
 
             # 参考URLを抽出して表示
             url_match = re.search(r'(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)', response.text)
