@@ -98,24 +98,20 @@ if submit_button:
                             from_label = m2.group(2)
                             edge_label = m2.group(3)
                             to_label = m2.group(5)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];
-'
+                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
                         elif m1:
                             from_label = m1.group(2)
                             to_label = m1.group(4)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}";
-'
+                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
                         elif m4:
                             from_label = m4.group(2)
                             edge_label = m4.group(3)
                             to_label = m4.group(5)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];
-'
+                            graphviz_code += f'    "{from_label}" -> "{to_label}" [label="{edge_label}"];\n'
                         elif m3:
                             from_label = m3.group(2)
                             to_label = m3.group(4)
-                            graphviz_code += f'    "{from_label}" -> "{to_label}";
-'
+                            graphviz_code += f'    "{from_label}" -> "{to_label}";\n'
                     graphviz_code += "}"
                     st.subheader("プロセスフロー図（自動変換Graphviz）")
                     st.code(graphviz_code, language="text")
