@@ -55,7 +55,7 @@ if submit_button:
 
     with st.spinner("Geminiで分析中..."):
         try:
-            model = genai.GenerativeModel("gemini-pro")
+            model = genai.GenerativeModel("gemini-1.0-pro")
             response = model.generate_content(prompt)
             st.subheader("分析結果")
             st.write(response.text)
@@ -70,4 +70,8 @@ if submit_button:
         except Exception as e:
             import traceback
             st.error("APIリクエスト中にエラーが発生しました。")
-            st.code(traceback.format_exc()) 
+            st.code(traceback.format_exc())
+
+models = genai.list_models()
+for m in models:
+    print(m.name) 
