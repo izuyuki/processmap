@@ -2,12 +2,17 @@ import streamlit as st
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+import re
 
-# 環境変数の読み込み
+# .envからAPIキーを読み込む
 load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Gemini APIの設定
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+if not GOOGLE_API_KEY:
+    st.error("Gemini APIキーが設定されていません。プロジェクトルートの.envファイルにGOOGLE_API_KEYを記載してください。")
+    st.stop()
+
+# Gemini APIの初期化
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # ページ設定
@@ -30,40 +35,39 @@ with st.form("input_form"):
 if submit_button:
     if not all([project_name, target_action, municipality]):
         st.error("すべての項目を入力してください。")
-    else:
-        # Gemini APIを使用して分析を実行
-        model = genai.GenerativeModel('gemini-pro')
-        
-        # プロンプトの作成
-        prompt = f"""
-        以下の情報を基に、事業プロセスとナッジ提案を作成してください：
+        st.stop()
 
-        事業名: {project_name}
-        目標行動: {target_action}
-        自治体名: {municipality}
+    prompt = f"""
+    以下の情報を基に、事業プロセスとナッジ提案を作成してください：
 
-        以下の形式で出力してください：
+    事業名: {project_name}
+    目標行動: {target_action}
+    自治体名: {municipality}
 
-        1. プロセスマップ（10ステップ程度）
-        2. 摩擦ポイントの特定
-        3. 燃料ポイントの特定
-        4. EASTフレームワークに基づくナッジ提案
-        5. Mermaid形式のフローチャート
-        """
+    以下の形式で出力してください：
 
-        with st.spinner("分析中..."):
+    1. プロセスマップ（10ステップ程度）
+    2. 摩擦ポイントの特定
+    3. 燃料ポイントの特定
+    4. EASTフレームワークに基づくナッジ提案
+    5. Mermaid形式のフローチャート（必ず```mermaid ...```で囲んでください）
+    """
+
+    with st.spinner("Geminiで分析中..."):
+        try:
+            model = genai.GenerativeModel("gemini-pro")
             response = model.generate_content(prompt)
-            
-            # 結果の表示
             st.subheader("分析結果")
             st.write(response.text)
-            
-            # Mermaid図の表示（テキストから抽出して表示）
-            st.subheader("プロセスフロー図")
-            st.mermaid("""
-            graph TD
-                A[開始] --> B[ステップ1]
-                B --> C[ステップ2]
-                C --> D[ステップ3]
-                D --> E[終了]
-            """) 
+
+            # Mermaid部分だけ抽出して表示
+            mermaid_match = re.search(r"```mermaid\\s*([\\s\\S]+?)```", response.text)
+            if mermaid_match:
+                st.subheader("プロセスフロー図")
+                st.mermaid(mermaid_match.group(1))
+            else:
+                st.info("Mermaid形式のフローチャートが見つかりませんでした。")
+        except Exception as e:
+            import traceback
+            st.error("APIリクエスト中にエラーが発生しました。")
+            st.code(traceback.format_exc()) 
