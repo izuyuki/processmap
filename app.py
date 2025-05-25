@@ -55,7 +55,7 @@ if submit_button:
 
     with st.spinner("Geminiで分析中..."):
         try:
-            model = genai.GenerativeModel("gemini-1.0-pro")
+            model = genai.GenerativeModel("gemini-1.5-pro")
             response = model.generate_content(prompt)
             st.subheader("分析結果")
             st.write(response.text)
