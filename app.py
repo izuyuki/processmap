@@ -75,7 +75,7 @@ if submit_button:
             st.write(response.text)
 
             # Mermaid部分だけ抽出して表示
-            mermaid_match = re.search(r"```mermaid\\s*([\\s\\S]+?)```", response.text)
+            mermaid_match = re.search(r"```mermaid\s*([\s\S]+?)```", response.text)
             if mermaid_match:
                 st.subheader("プロセスフロー図")
                 st.mermaid(mermaid_match.group(1))
