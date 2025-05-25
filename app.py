@@ -74,13 +74,27 @@ if submit_button:
             st.subheader("分析結果")
             st.write(response.text)
 
-            # Mermaid部分だけ抽出して表示
-            mermaid_match = re.search(r"```mermaid\s*([\s\S]+?)```", response.text)
-            if mermaid_match:
-                st.subheader("プロセスフロー図")
-                st.mermaid(mermaid_match.group(1))
+            # Graphviz部分だけ抽出して表示
+            graphviz_match = re.search(r"```graphviz\s*([\s\S]+?)```", response.text)
+            if graphviz_match:
+                st.subheader("プロセスフロー図（Graphviz形式）")
+                st.graphviz_chart(graphviz_match.group(1))
             else:
-                st.info("Mermaid形式のフローチャートが見つかりませんでした。")
+                # Mermaid記法があればGraphvizに変換して表示（簡易変換例）
+                mermaid_match = re.search(r"```mermaid\s*([\s\S]+?)```", response.text)
+                if mermaid_match:
+                    mermaid_code = mermaid_match.group(1)
+                    # 簡易的にMermaidのノードとエッジをGraphvizに変換
+                    graphviz_code = "digraph G {\n"
+                    for line in mermaid_code.splitlines():
+                        m = re.match(r"\s*([A-Za-z0-9_]+)\[.*?\]\s*--?>\s*([A-Za-z0-9_]+)\[.*?\]", line)
+                        if m:
+                            graphviz_code += f'    {m.group(1)} -> {m.group(2)};\n'
+                    graphviz_code += "}"
+                    st.subheader("プロセスフロー図（自動変換Graphviz）")
+                    st.graphviz_chart(graphviz_code)
+                else:
+                    st.info("Graphviz形式またはMermaid形式のフローチャートが見つかりませんでした。")
         except Exception as e:
             import traceback
             st.error("APIリクエスト中にエラーが発生しました。")
